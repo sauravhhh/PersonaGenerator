@@ -2,336 +2,212 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2e2a72">
+    <meta name="description" content="PersonaGen - Generate realistic random personas with one tap. Name, email, phone, location and date of birth, ready to copy.">
     <title>PersonaGen - Random User Generator</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --white: #ffffff;
-            --snow: #f9f9f9;
-            --ivory: #f8f8f8;
-            --pearl: #f2f2f2;
-            --cloud: #e8e8e8;
-            --silver: #c0c0c0;
-            --gray: #808080;
-            --dark-gray: #505050;
+            --ink: #1c1b2e;
+            --muted: #6b6a80;
+            --line: #ecebf3;
+            --bg: #f6f6fa;
+            --card: #ffffff;
+            --indigo: #2e2a72;
+            --indigo-deep: #23205c;
+            --teal: #17b890;
+            --radius: 18px;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
         body {
-            background-color: var(--snow);
-            color: var(--dark-gray);
-            line-height: 1.6;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: var(--white);
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-
-        header {
-            background-color: var(--ivory);
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid var(--pearl);
-        }
-
-        h1 {
-            color: var(--dark-gray);
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: var(--gray);
-            font-size: 14px;
-        }
-
-        .user-card {
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            border-bottom: 1px solid var(--pearl);
+            padding: 24px 16px calc(32px + env(safe-area-inset-bottom));
+            -webkit-tap-highlight-color: transparent;
         }
+        .wrap { width: 100%; max-width: 460px; }
 
-        .user-image-container {
+        /* Brand header */
+        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .brand img { width: 46px; height: 46px; border-radius: 13px; box-shadow: 0 4px 14px rgba(46,42,114,.28); }
+        .brand h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+        .brand p { font-size: 13px; color: var(--muted); margin-top: 1px; }
+
+        /* Persona card */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 34px rgba(28,27,46,.08);
+            overflow: hidden;
+            transition: opacity .25s ease;
+        }
+        .card-top {
+            background: linear-gradient(135deg, var(--indigo) 0%, #4a46b8 100%);
+            padding: 30px 24px 64px;
+            text-align: center;
             position: relative;
-            margin-bottom: 20px;
         }
-
-        .user-image {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid var(--ivory);
+        .avatar-wrap { position: relative; display: inline-block; margin-bottom: -52px; z-index: 1; }
+        .avatar {
+            width: 118px; height: 118px; border-radius: 50%;
+            object-fit: cover; background: #dcdbe8;
+            border: 5px solid #fff;
+            box-shadow: 0 8px 22px rgba(0,0,0,.25);
         }
-
         .download-btn {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background-color: var(--ivory);
-            border: 1px solid var(--cloud);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: absolute; right: 2px; bottom: 6px;
+            width: 40px; height: 40px; border-radius: 50%;
+            border: 3px solid #fff; background: var(--teal); color: #fff;
+            font-size: 15px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,.22);
         }
+        .download-btn:active { transform: scale(.93); }
 
-        .download-btn:hover {
-            background-color: var(--pearl);
-            transform: scale(1.05);
+        .card-body { padding: 66px 20px 20px; }
+        .name { text-align: center; font-size: 21px; font-weight: 800; letter-spacing: -0.3px; }
+        .name-sub { text-align: center; font-size: 13px; color: var(--muted); margin: 4px 0 18px; }
+
+        .row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 13px 14px; border-radius: 12px;
+            background: var(--bg);
         }
-
-        .user-info {
-            width: 100%;
+        .row + .row { margin-top: 9px; }
+        .row .ric {
+            width: 38px; height: 38px; flex: 0 0 38px; border-radius: 11px;
+            background: #fff; color: var(--indigo);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; box-shadow: inset 0 0 0 1px var(--line);
         }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--cloud);
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .info-label {
-            font-weight: 600;
-            color: var(--gray);
-            flex: 1;
-        }
-
-        .info-value-container {
-            display: flex;
-            align-items: center;
-            flex: 2;
-        }
-
-        .info-value {
-            color: var(--dark-gray);
-            margin-right: 10px;
-            word-break: break-word;
-        }
-
+        .row .rinfo { flex: 1; min-width: 0; }
+        .row .rlabel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); }
+        .row .rvalue { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .copy-btn {
-            background-color: var(--ivory);
-            border: 1px solid var(--cloud);
-            border-radius: 4px;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
+            flex: 0 0 40px; width: 40px; height: 40px; border-radius: 11px;
+            border: 1px solid var(--line); background: #fff; color: var(--muted);
+            font-size: 14px; cursor: pointer; transition: all .18s ease;
         }
+        .copy-btn:active { transform: scale(.92); }
+        .copy-btn.copied { background: var(--teal); border-color: var(--teal); color: #fff; }
 
-        .copy-btn:hover {
-            background-color: var(--pearl);
+        /* Skeleton shimmer while loading */
+        .card.loading .avatar { filter: blur(2px) brightness(.92); }
+        .card.loading .rvalue { position: relative; color: transparent; }
+        .card.loading .rvalue::after {
+            content: ''; position: absolute; inset: 4px 0; border-radius: 6px;
+            background: linear-gradient(90deg, #e6e5ef 25%, #f3f2f8 50%, #e6e5ef 75%);
+            background-size: 200% 100%; animation: shimmer 1.1s infinite linear;
         }
+        @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
-        .copy-btn.copied {
-            background-color: var(--pearl);
-            color: var(--gray);
+        /* Generate button */
+        .generate-btn {
+            width: 100%; margin-top: 16px; padding: 17px;
+            border: none; border-radius: var(--radius);
+            background: linear-gradient(135deg, var(--indigo), #4a46b8);
+            color: #fff; font-size: 16px; font-weight: 800; letter-spacing: .2px;
+            cursor: pointer; box-shadow: 0 10px 24px rgba(46,42,114,.32);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            min-height: 56px;
         }
+        .generate-btn:active { transform: scale(.985); }
+        .generate-btn:disabled { opacity: .7; }
+        .generate-btn .fa-spin { display: none; }
+        .generate-btn.busy .fa-spin { display: inline-block; }
+        .generate-btn.busy .fa-arrows-rotate { display: none; }
 
-        .button-container {
-            padding: 20px;
-            text-align: center;
-        }
+        footer { text-align: center; margin-top: 22px; font-size: 13px; color: var(--muted); }
 
-        .refresh-btn {
-            background-color: var(--ivory);
-            color: var(--dark-gray);
-            border: 1px solid var(--cloud);
-            padding: 12px 24px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .refresh-btn:hover {
-            background-color: var(--pearl);
-        }
-
-        .refresh-btn:active {
-            transform: scale(0.98);
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: var(--gray);
-        }
-
-        .spinner {
-            border: 4px solid var(--pearl);
-            border-radius: 50%;
-            border-top: 4px solid var(--silver);
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
+        /* Toast */
         .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--dark-gray);
-            color: var(--white);
-            padding: 10px 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 1000;
+            position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 80px);
+            background: var(--ink); color: #fff; font-size: 14px; font-weight: 600;
+            padding: 12px 20px; border-radius: 999px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.25);
+            opacity: 0; transition: all .3s ease; z-index: 50; pointer-events: none;
+            max-width: calc(100vw - 48px); text-align: center;
         }
+        .toast.show { transform: translate(-50%, 0); opacity: 1; }
 
-        .toast.show {
-            opacity: 1;
-        }
-
-        footer {
-            background-color: var(--ivory);
-            padding: 15px;
-            text-align: center;
-            font-size: 14px;
-            color: var(--gray);
-        }
-
-        @media (max-width: 600px) {
-            .user-card {
-                padding: 15px;
-            }
-
-            .info-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
-
-            .info-value-container {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .info-label {
-                font-weight: 600;
-            }
-
-            h1 {
-                font-size: 20px;
-            }
+        @media (min-width: 520px) {
+            .wrap { max-width: 500px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>PersonaGen</h1>
-            <p class="subtitle">Generate random personas with a single click</p>
-        </header>
-
-        <div class="user-card" id="userCard">
-            <div class="user-image-container">
-                <img class="user-image" id="userImage" src="https://via.placeholder.com/120" alt="User Image">
-                <button class="download-btn" id="downloadBtn" title="Download profile picture">
-                    <i class="fas fa-download"></i>
-                </button>
+    <div class="wrap">
+        <div class="brand">
+            <img src="icon-192.png" alt="PersonaGen icon">
+            <div>
+                <h1>PersonaGen</h1>
+                <p>Realistic random personas, one tap away</p>
             </div>
-            <div class="user-info" id="userInfo">
-                <div class="info-row">
-                    <span class="info-label">Name:</span>
-                    <div class="info-value-container">
-                        <span class="info-value" id="userName">Click "Generate Persona" to fetch data</span>
-                        <button class="copy-btn" id="copyName" title="Copy name">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
+        </div>
+
+        <div class="card" id="userCard">
+            <div class="card-top">
+                <div class="avatar-wrap">
+                    <img class="avatar" id="userImage" src="icon-192.png" alt="Persona photo">
+                    <button class="download-btn" id="downloadBtn" title="Download profile picture" aria-label="Download profile picture">
+                        <i class="fas fa-download"></i>
+                    </button>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Email:</span>
-                    <div class="info-value-container">
-                        <span class="info-value" id="userEmail">-</span>
-                        <button class="copy-btn" id="copyEmail" title="Copy email">
-                            <i class="fas fa-copy"></i>
-                        </button>
+            </div>
+            <div class="card-body">
+                <div class="name" id="userName">Generating…</div>
+                <div class="name-sub" id="userNat">Tap generate for a new persona</div>
+
+                <div class="row">
+                    <div class="ric"><i class="fas fa-envelope"></i></div>
+                    <div class="rinfo">
+                        <div class="rlabel">Email</div>
+                        <div class="rvalue" id="userEmail">—</div>
                     </div>
+                    <button class="copy-btn" id="copyEmail" title="Copy email" aria-label="Copy email"><i class="fas fa-copy"></i></button>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Phone:</span>
-                    <div class="info-value-container">
-                        <span class="info-value" id="userPhone">-</span>
-                        <button class="copy-btn" id="copyPhone" title="Copy phone">
-                            <i class="fas fa-copy"></i>
-                        </button>
+                <div class="row">
+                    <div class="ric"><i class="fas fa-phone"></i></div>
+                    <div class="rinfo">
+                        <div class="rlabel">Phone</div>
+                        <div class="rvalue" id="userPhone">—</div>
                     </div>
+                    <button class="copy-btn" id="copyPhone" title="Copy phone" aria-label="Copy phone"><i class="fas fa-copy"></i></button>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Location:</span>
-                    <div class="info-value-container">
-                        <span class="info-value" id="userLocation">-</span>
-                        <button class="copy-btn" id="copyLocation" title="Copy location">
-                            <i class="fas fa-copy"></i>
-                        </button>
+                <div class="row">
+                    <div class="ric"><i class="fas fa-location-dot"></i></div>
+                    <div class="rinfo">
+                        <div class="rlabel">Location</div>
+                        <div class="rvalue" id="userLocation">—</div>
                     </div>
+                    <button class="copy-btn" id="copyLocation" title="Copy location" aria-label="Copy location"><i class="fas fa-copy"></i></button>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Date of Birth:</span>
-                    <div class="info-value-container">
-                        <span class="info-value" id="userDOB">-</span>
-                        <button class="copy-btn" id="copyDOB" title="Copy date of birth">
-                            <i class="fas fa-copy"></i>
-                        </button>
+                <div class="row">
+                    <div class="ric"><i class="fas fa-cake-candles"></i></div>
+                    <div class="rinfo">
+                        <div class="rlabel">Date of birth</div>
+                        <div class="rvalue" id="userDOB">—</div>
                     </div>
+                    <button class="copy-btn" id="copyDOB" title="Copy date of birth" aria-label="Copy date of birth"><i class="fas fa-copy"></i></button>
                 </div>
             </div>
         </div>
 
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Loading user data...</p>
-        </div>
+        <button class="generate-btn" id="refreshBtn">
+            <i class="fas fa-arrows-rotate"></i><i class="fas fa-spinner fa-spin"></i>
+            <span>Generate Persona</span>
+        </button>
 
-        <div class="button-container">
-            <button class="refresh-btn" id="refreshBtn">Generate Persona</button>
-        </div>
-
-        <footer>
-            Made with ❤️ by Sauravhhh
-        </footer>
+        <footer>Made with ❤️ by Sauravhhh</footer>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -339,44 +215,33 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const refreshBtn = document.getElementById('refreshBtn');
-            const loading = document.getElementById('loading');
-            const userCard = document.getElementById('userCard');
+            const card = document.getElementById('userCard');
             const downloadBtn = document.getElementById('downloadBtn');
             const toast = document.getElementById('toast');
-            
-            // Copy buttons
-            const copyName = document.getElementById('copyName');
-            const copyEmail = document.getElementById('copyEmail');
-            const copyPhone = document.getElementById('copyPhone');
-            const copyLocation = document.getElementById('copyLocation');
-            const copyDOB = document.getElementById('copyDOB');
-            
+
             refreshBtn.addEventListener('click', fetchRandomUser);
             downloadBtn.addEventListener('click', downloadProfileImage);
-            
-            copyName.addEventListener('click', () => copyToClipboard('userName'));
-            copyEmail.addEventListener('click', () => copyToClipboard('userEmail'));
-            copyPhone.addEventListener('click', () => copyToClipboard('userPhone'));
-            copyLocation.addEventListener('click', () => copyToClipboard('userLocation'));
-            copyDOB.addEventListener('click', () => copyToClipboard('userDOB'));
-            
+
+            const copyMap = { copyEmail: 'userEmail', copyPhone: 'userPhone', copyLocation: 'userLocation', copyDOB: 'userDOB' };
+            Object.keys(copyMap).forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.addEventListener('click', () => copyToClipboard(copyMap[id]));
+            });
+
+            // Tapping the name copies it too
+            document.getElementById('userName').style.cursor = 'pointer';
+            document.getElementById('userName').addEventListener('click', () => copyToClipboard('userName'));
+
             // Fetch a random user on page load
             fetchRandomUser();
-            
+
             // Email providers
             const emailProviders = [
-                'zmail.com',
-                'kitemail.org',
-                'kapili.com',
-                'quickpost.net',
-                'flashmail.io',
-                'swiftmsg.com',
-                'rapidmail.org',
-                'expressmail.io',
-                'instamail.com',
-                'fastmail.org'
+                'zmail.com', 'kitemail.org', 'kapili.com', 'quickpost.net',
+                'flashmail.io', 'swiftmsg.com', 'rapidmail.org', 'expressmail.io',
+                'instamail.com', 'fastmail.org'
             ];
-            
+
             // Country codes mapping
             const countryCodes = {
                 'AU': '+61', 'BR': '+55', 'CA': '+1', 'CH': '+41', 'DE': '+49',
@@ -403,110 +268,117 @@
                 'PY': '+595', 'QA': '+974', 'RW': '+250', 'SA': '+966', 'SD': '+249',
                 'SL': '+232', 'SN': '+221', 'SO': '+252', 'SS': '+211', 'ST': '+239',
                 'SV': '+503', 'SY': '+963', 'TD': '+235', 'TG': '+228', 'TJ': '+992',
-                'TM': '+993', 'UA': '+380', 'UY': '+598', 'UZ': '+998', 'YE': '+967'
+                'TM': '+993', 'UY': '+598', 'UZ': '+998', 'YE': '+967'
             };
-            
+
+            const countryNames = {
+                'AU': 'Australia', 'BR': 'Brazil', 'CA': 'Canada', 'CH': 'Switzerland', 'DE': 'Germany',
+                'DK': 'Denmark', 'ES': 'Spain', 'FI': 'Finland', 'FR': 'France', 'GB': 'United Kingdom',
+                'IE': 'Ireland', 'IN': 'India', 'IR': 'Iran', 'MX': 'Mexico', 'NL': 'Netherlands',
+                'NO': 'Norway', 'NZ': 'New Zealand', 'RS': 'Serbia', 'TR': 'Turkey', 'UA': 'Ukraine',
+                'US': 'United States'
+            };
+
+            let currentPhotoIsReal = false;
+
             async function fetchRandomUser() {
-                // Show loading spinner
-                loading.style.display = 'block';
-                userCard.style.opacity = '0.5';
-                
+                card.classList.add('loading');
+                refreshBtn.classList.add('busy');
+                refreshBtn.disabled = true;
+
                 try {
-                    const response = await fetch('https://randomuser.me/api/', {
-                        method: 'GET',
-                        headers: {}
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    
+                    const response = await fetch('https://randomuser.me/api/');
+                    if (!response.ok) throw new Error('Network response was not ok');
                     const data = await response.json();
                     displayUserData(data.results[0]);
                 } catch (error) {
                     console.error('Error fetching user data:', error);
                     displayError();
+                    showToast('Could not reach the network — check connection');
                 } finally {
-                    // Hide loading spinner
-                    loading.style.display = 'none';
-                    userCard.style.opacity = '1';
+                    card.classList.remove('loading');
+                    refreshBtn.classList.remove('busy');
+                    refreshBtn.disabled = false;
                 }
             }
-            
+
             function displayUserData(user) {
                 document.getElementById('userImage').src = user.picture.large;
+                currentPhotoIsReal = true;
                 document.getElementById('userName').textContent = `${user.name.title} ${user.name.first} ${user.name.last}`;
-                
-                // Process email with custom provider
+                document.getElementById('userNat').textContent =
+                    (countryNames[user.nat] || user.nat) + ' · ' + user.gender.charAt(0).toUpperCase() + user.gender.slice(1);
+
+                // Email with a custom provider
                 const emailParts = user.email.split('@');
                 const randomProvider = emailProviders[Math.floor(Math.random() * emailProviders.length)];
-                const customEmail = `${emailParts[0]}@${randomProvider}`;
-                document.getElementById('userEmail').textContent = customEmail;
-                
-                // Process phone with country code
+                document.getElementById('userEmail').textContent = `${emailParts[0]}@${randomProvider}`;
+
+                // Phone with country code
                 const countryCode = countryCodes[user.nat] || '+1';
-                // Remove any existing country code and format the phone number
                 const phoneNumber = user.phone.replace(/\D/g, '');
-                const formattedPhone = `${countryCode} ${phoneNumber}`;
-                document.getElementById('userPhone').textContent = formattedPhone;
-                
+                document.getElementById('userPhone').textContent = `${countryCode} ${phoneNumber}`;
+
                 document.getElementById('userLocation').textContent = `${user.location.city}, ${user.location.country}`;
-                
-                // Format date of birth
+
+                // Date of birth
                 const dob = new Date(user.dob.date);
-                const formattedDate = dob.toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                document.getElementById('userDOB').textContent = dob.toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'long', day: 'numeric'
                 });
-                document.getElementById('userDOB').textContent = formattedDate;
             }
-            
+
             function displayError() {
                 document.getElementById('userName').textContent = 'Error fetching user data';
-                document.getElementById('userEmail').textContent = '-';
-                document.getElementById('userPhone').textContent = '-';
-                document.getElementById('userLocation').textContent = '-';
-                document.getElementById('userDOB').textContent = '-';
+                document.getElementById('userNat').textContent = 'Tap generate to retry';
+                ['userEmail', 'userPhone', 'userLocation', 'userDOB'].forEach(id => {
+                    document.getElementById(id).textContent = '—';
+                });
             }
-            
+
             function copyToClipboard(elementId) {
-                const text = document.getElementById(elementId).textContent;
-                
-                if (text === '-' || text === 'Error fetching user data' || text === 'Click "Generate Persona" to fetch data') {
+                const text = document.getElementById(elementId).textContent.trim();
+                if (!text || text === '—' || text === 'Error fetching user data' || text === 'Generating…') {
                     showToast('No data to copy');
                     return;
                 }
-                
-                navigator.clipboard.writeText(text)
-                    .then(() => {
-                        // Update button to show it was copied
-                        const button = document.getElementById(`copy${elementId.replace('user', '')}`);
-                        button.classList.add('copied');
-                        button.innerHTML = '<i class="fas fa-check"></i>';
-                        
-                        // Reset button after 2 seconds
+                const done = () => {
+                    const btn = document.getElementById('copy' + elementId.replace('user', ''));
+                    if (btn) {
+                        btn.classList.add('copied');
+                        btn.innerHTML = '<i class="fas fa-check"></i>';
                         setTimeout(() => {
-                            button.classList.remove('copied');
-                            button.innerHTML = '<i class="fas fa-copy"></i>';
+                            btn.classList.remove('copied');
+                            btn.innerHTML = '<i class="fas fa-copy"></i>';
                         }, 2000);
-                        
-                        showToast('Copied to clipboard');
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy: ', err);
-                        showToast('Failed to copy');
+                    }
+                    showToast('Copied to clipboard');
+                };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(done).catch(() => {
+                        fallbackCopy(text); done();
                     });
+                } else {
+                    fallbackCopy(text); done();
+                }
             }
-            
+
+            function fallbackCopy(text) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); } catch (e) {}
+                document.body.removeChild(ta);
+            }
+
             function downloadProfileImage() {
                 const imageUrl = document.getElementById('userImage').src;
-                
-                if (imageUrl.includes('via.placeholder.com')) {
-                    showToast('No image to download');
+                if (!currentPhotoIsReal || imageUrl.includes('icon-192.png')) {
+                    showToast('No photo to download yet');
                     return;
                 }
-                
                 fetch(imageUrl)
                     .then(response => response.blob())
                     .then(blob => {
@@ -514,19 +386,12 @@
                         const a = document.createElement('a');
                         a.style.display = 'none';
                         a.href = url;
-                        
-                        // Extract name from the user data for filename
                         const userName = document.getElementById('userName').textContent;
-                        const fileName = userName.replace(/\s+/g, '_').toLowerCase() + '_profile.jpg';
-                        
-                        a.download = fileName;
+                        a.download = userName.replace(/\s+/g, '_').toLowerCase() + '_profile.jpg';
                         document.body.appendChild(a);
                         a.click();
-                        
-                        // Clean up
                         window.URL.revokeObjectURL(url);
                         document.body.removeChild(a);
-                        
                         showToast('Image downloaded');
                     })
                     .catch(err => {
@@ -534,13 +399,19 @@
                         showToast('Failed to download image');
                     });
             }
-     function showToast(message) {
+
+            function showToast(message) {
                 toast.textContent = message;
                 toast.classList.add('show');
-                
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 3000);
+                clearTimeout(showToast._t);
+                showToast._t = setTimeout(() => toast.classList.remove('show'), 2600);
+            }
+
+            // Register service worker for installable PWA
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW registration failed:', err));
+                });
             }
         });
     </script>
